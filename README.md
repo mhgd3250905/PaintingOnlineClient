@@ -3,9 +3,9 @@
 > 疫情期间和女友玩了微信小程序版本的你画我猜，比较有趣，本来打算做出来和女友一起玩，但没想到还没做完就和女友吵架不联系了，所以这个工程承载了我从开心到心痛的心态变化...
 
 ### 1.项目展示
-![home2.jpg](https://upload-images.jianshu.io/upload_images/1698871-1a8da64aa6d87f1c.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![主界面](./img/home.jpg)
 
-![home.jpg](https://upload-images.jianshu.io/upload_images/1698871-7555d2078e5dec66.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+![主界面](./img/home2.jpg)
 
 ### 2.项目描述
 
