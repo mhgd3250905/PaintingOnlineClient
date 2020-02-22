@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:painting/WebStudy/model_net_data.dart';
 import 'package:web_socket_channel/io.dart';
 
 import 'model_paint.dart';
+import 'view_draw.dart';
 
 class HomePage extends StatefulWidget {
   final channel = new IOWebSocketChannel.connect('ws://49.234.76.105:80/ping');
@@ -14,15 +16,14 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  String inputStr;
-  PPosBox _pPosBox;
+  PPosBox _pPosBox; //绘画数据管理器
   Offset _pos = Offset(0, 0);
-  Color paintColor = Colors.black;
-  double paintWidth = 2.0;
-  String lastData = '';
-  bool isPainting = true;
-  StringBuffer connectInfo = new StringBuffer();
-  String lastInfo = '';
+  Color paintColor = Colors.black; //画笔颜色
+  double paintWidth = 2.0; //画笔宽度
+  String lastData = ''; //上次的数据，用于对比接收数据的flag
+  bool isPainting = true; //时候处于绘画
+  StringBuffer connectInfo = new StringBuffer(); //保存数据
+  String lastInfo = ''; //用来对比接收数据避免重复的flag
 
   @override
   void initState() {
@@ -30,117 +31,204 @@ class _HomePageState extends State<HomePage> {
     _pPosBox = new PPosBox();
   }
 
-  Widget buildButton(String title, Color color, VoidCallback onPressed) {
+  //创建宽度按钮
+  Widget buildWidthButton(
+      Color color, double radius, bool checked, VoidCallback onPressed) {
+    return Expanded(
+      flex: 1,
+      child: InkWell(
+        onTap: onPressed,
+        child: Container(
+          child: Center(
+            child: Column(
+              children: <Widget>[
+                Container(
+                  height: 30.0,
+                  margin: const EdgeInsets.only(bottom: 5.0),
+                  child: checked
+                      ? Icon(
+                          Icons.keyboard_arrow_down,
+                          color: paintColor,
+                        )
+                      : Container(),
+                ),
+                CircleAvatar(
+                  backgroundColor: color,
+                  radius: radius,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  //创建主菜单按钮
+  Widget buildMainButton(String title, bool checked, VoidCallback onPressed) {
     return Expanded(
       flex: 1,
       child: Container(
-        margin: const EdgeInsets.only(left: 5.0, right: 5.0),
-        child: MaterialButton(
-          color: color,
-          child: Text(
-            title,
-            style: TextStyle(
-              color: Colors.white,
+        height: 50.0,
+        margin: const EdgeInsets.only(
+            top: 10.0, left: 5.0, right: 5.0, bottom: 5.0),
+        decoration: BoxDecoration(boxShadow: [
+          BoxShadow(
+              color: Colors.grey[300],
+              offset: Offset(1.0, 1.0), //阴影xy轴偏移量
+              blurRadius: 1.0, //阴影模糊程度
+              spreadRadius: 1.0 //阴影扩散程度
+              )
+        ]),
+        child: InkWell(
+          child: Container(
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: !checked ? Colors.white : Colors.black87,
+              borderRadius: BorderRadius.circular(2.5),
+              border: Border.all(
+                  color: checked ? Colors.white : Colors.black87,
+                  width: checked ? 0 : 1.0),
+            ),
+            child: Text(
+              title,
+              style: TextStyle(
+                color: checked ? Colors.white : Colors.black87,
+              ),
             ),
           ),
+          onTap: onPressed,
+        ),
+      ),
+    );
+  }
+
+  //创建颜色按钮
+  Widget buildColorButton(Color color, bool checked, VoidCallback onPressed) {
+    return Expanded(
+      flex: 1,
+      child: Container(
+        margin: const EdgeInsets.all(3.0),
+        child: MaterialButton(
+          color: color,
+          child: checked
+              ? Icon(
+                  Icons.check,
+                  color: Colors.white,
+                )
+              : Container(),
           onPressed: onPressed,
         ),
       ),
     );
   }
 
+  //创建主菜单
   Widget buildMainMenu() {
     return Container(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          buildButton('绘图', isPainting ? Colors.black87 : Colors.black54, () {
+          buildMainButton('绘图', isPainting, () {
             setState(() {
               isPainting = true;
             });
           }),
-          buildButton('观看', !isPainting ? Colors.black87 : Colors.black54, () {
+          buildMainButton('观看', !isPainting, () {
             setState(() {
               isPainting = false;
             });
           }),
-          buildButton('清空', Colors.black87, () {
+          buildMainButton('清空', true, () {
             setState(() {
-              connectInfo.clear();
-              _pPosBox.clear();
-            });
-          }),
-        ],
-      ),
-    );
-  }
-
-  Widget buildColorMenu() {
-    return Container(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          buildButton('', Colors.black, () {
-            paintColor = Colors.black;
-          }),
-          buildButton('', Colors.blue, () {
-            paintColor = Colors.blue;
-          }),
-          buildButton('', Colors.deepOrangeAccent, () {
-            paintColor = Colors.deepOrangeAccent;
-          }),
-          buildButton('', Colors.green, () {
-            paintColor = Colors.green;
-          }),
-          buildButton('', Colors.purpleAccent, () {
-            paintColor = Colors.purpleAccent;
-          }),
-          buildButton('', Colors.yellow, () {
-            paintColor = Colors.yellow;
-          }),
-        ],
-      ),
-    );
-  }
-
-  Widget buildWidthMenu() {
-    return Container(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          buildButton('2px', Colors.black54, () {
-            paintWidth = 2.0;
-          }),
-          buildButton('5px', Colors.black54, () {
-            paintWidth = 5.0;
-          }),
-          buildButton('10px', Colors.black54, () {
-            paintWidth = 10.0;
-          }),
-          buildButton('15px', Colors.black54, () {
-            paintWidth = 15.0;
-          }),
-          buildButton('20px', Colors.black54, () {
-            paintWidth = 20.0;
-            setState(() {
-              _pPosBox.clear();
               if (isPainting) {
+                connectInfo.clear();
+                _pPosBox.clear();
                 widget.channel.sink.add(pposData2Json());
               }
             });
           }),
-          buildButton('30px', Colors.black54, () {
-            paintWidth = 30.0;
-//            String jsonStr = pposData2Json();
-//            widget.channel.sink.add(jsonStr);
-            widget.channel.sink.add(
-                '{"data": [[{"color": 4278190080,"width": 2.0,"pos": {"x": 187.734375,"y": 320.810546875}}, {"color": 4278190080,"width": 2.0,"pos": {"x": 187.998046875,"y": 320.625}}, {"color": 4278190080,"width": 2.0,"pos": {"x": 188.349609375,"y": 320.810546875}}, {"color": 4278190080,"width": 2.0,"pos": {"x": 188.525390625,"y": 320.99609375}}, {"color": 4278190080,"width": 2.0,"pos": {"x": 188.525390625,"y": 321.181640625}}, {"color": 4278190080,"width": 2.0,"pos": {"x": 188.4375,"y": 321.73828125}}, {"color": 4278190080,"width": 2.0,"pos": {"x": 188.349609375,"y": 321.923828125}}, {"color": 4278190080,"width": 2.0,"pos": {"x": 188.0859375,"y": 322.294921875}}, {"color": 4278190080,"width": 2.0,"pos": {"x": 187.734375,"y": 322.8515625}}, {"color": 4278190080,"width": 2.0,"pos": {"x": 185.888671875,"y": 325.078125}}, {"color": 4278190080,"width": 2.0,"pos": {"x": 184.5703125,"y": 326.93359375}}, {"color": 4278190080,"width": 2.0,"pos": {"x": 182.63671875,"y": 328.7890625}}, {"color": 4278190080,"width": 2.0,"pos": {"x": 181.0546875,"y": 330.087890625}}, {"color": 4278190080,"width": 2.0,"pos": {"x": 179.736328125,"y": 331.943359375}}, {"color": 4278190080,"width": 2.0,"pos": {"x": 178.330078125,"y": 333.427734375}}, {"color": 4278190080,"width": 2.0,"pos": {"x": 176.8359375,"y": 335.09765625}}, {"color": 4278190080,"width": 2.0,"pos": {"x": 175.869140625,"y": 336.58203125}}, {"color": 4278190080,"width": 2.0,"pos": {"x": 174.55078125,"y": 338.06640625}}, {"color": 4278190080,"width": 2.0,"pos": {"x": 173.408203125,"y": 339.55078125}}, {"color": 4278190080,"width": 2.0,"pos": {"x": 172.353515625,"y": 341.03515625}}, {"color": 4278190080,"width": 2.0,"pos": {"x": 171.5625,"y": 342.333984375}}, {"color": 4278190080,"width": 2.0,"pos": {"x": 171.2109375,"y": 343.818359375}}, {"color": 4278190080,"width": 2.0,"pos": {"x": 170.5078125,"y": 345.302734375}}, {"color": 4278190080,"width": 2.0,"pos": {"x": 170.15625,"y": 346.6015625}}, {"color": 4278190080,"width": 2.0,"pos": {"x": 169.892578125,"y": 347.529296875}}, {"color": 4278190080,"width": 2.0,"pos": {"x": 169.62890625,"y": 348.45703125}}, {"color": 4278190080,"width": 2.0,"pos": {"x": 169.365234375,"y": 349.19921875}}, {"color": 4278190080,"width": 2.0,"pos": {"x": 169.013671875,"y": 350.126953125}}, {"color": 4278190080,"width": 2.0,"pos": {"x": 168.92578125,"y": 350.68359375}}, {"color": 4278190080,"width": 2.0,"pos": {"x": 168.75,"y": 351.42578125}}, {"color": 4278190080,"width": 2.0,"pos": {"x": 168.3984375,"y": 351.982421875}}, {"color": 4278190080,"width": 2.0,"pos": {"x": 168.134765625,"y": 352.5390625}}, {"color": 4278190080,"width": 2.0,"pos": {"x": 168.046875,"y": 352.91015625}}, {"color": 4278190080,"width": 2.0,"pos": {"x": 167.607421875,"y": 353.466796875}}, {"color": 4278190080,"width": 2.0,"pos": {"x": 167.51953125,"y": 353.65234375}}, {"color": 4278190080,"width": 2.0,"pos": {"x": 167.255859375,"y": 353.65234375}}]]}');
+        ],
+      ),
+    );
+  }
+
+  //创建颜色菜单
+  Widget buildColorMenu() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 5.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          buildColorButton(Colors.black, paintColor == Colors.black, () {
+            paintColor = Colors.black;
+            setState(() {});
+          }),
+          buildColorButton(Colors.blue, paintColor == Colors.blue, () {
+            paintColor = Colors.blue;
+            setState(() {});
+          }),
+          buildColorButton(
+              Colors.deepOrangeAccent, paintColor == Colors.deepOrangeAccent,
+              () {
+            paintColor = Colors.deepOrangeAccent;
+            setState(() {});
+          }),
+          buildColorButton(Colors.green, paintColor == Colors.green, () {
+            paintColor = Colors.green;
+            setState(() {});
+          }),
+          buildColorButton(
+              Colors.purpleAccent, paintColor == Colors.purpleAccent, () {
+            paintColor = Colors.purpleAccent;
+            setState(() {});
+          }),
+          buildColorButton(Colors.yellow, paintColor == Colors.yellow, () {
+            paintColor = Colors.yellow;
+            setState(() {});
           }),
         ],
       ),
     );
   }
 
+  //创建宽度菜单
+  Widget buildWidthMenu() {
+    return Container(
+      margin: const EdgeInsets.only(top: 5.0, bottom: 5.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          buildWidthButton(paintColor, 1.0, paintWidth == 2.0, () {
+            paintWidth = 2.0;
+            setState(() {});
+          }),
+          buildWidthButton(paintColor, 2.5, paintWidth == 5.0, () {
+            paintWidth = 5.0;
+            setState(() {});
+          }),
+          buildWidthButton(paintColor, 5.0, paintWidth == 10.0, () {
+            paintWidth = 10.0;
+            setState(() {});
+          }),
+          buildWidthButton(paintColor, 7.5, paintWidth == 15.0, () {
+            paintWidth = 15.0;
+            setState(() {});
+          }),
+          buildWidthButton(paintColor, 10.0, paintWidth == 20.0, () {
+            paintWidth = 20.0;
+            setState(() {});
+          }),
+          buildWidthButton(paintColor, 15.0, paintWidth == 30.0, () {
+            paintWidth = 30.0;
+            setState(() {});
+          }),
+        ],
+      ),
+    );
+  }
+
+  //将绘制数据转化为Json数据
   String pposData2Json() {
     DataJson dataJson = DataJson('{"data":[]}');
     _pPosBox.box.forEach((line) {
@@ -166,7 +254,7 @@ class _HomePageState extends State<HomePage> {
       home: Scaffold(
         appBar: AppBar(
           title: Text(
-            '你画我猜测试版(${_pos.dx},${_pos.dy})',
+            '你画我猜',
             textDirection: TextDirection.ltr,
             style: TextStyle(
               fontWeight: FontWeight.bold,
@@ -180,8 +268,6 @@ class _HomePageState extends State<HomePage> {
           child: Column(
             children: <Widget>[
               buildMainMenu(),
-              buildColorMenu(),
-              buildWidthMenu(),
               Expanded(
                 child: GestureDetector(
                   onPanStart: (detail) {
@@ -208,93 +294,64 @@ class _HomePageState extends State<HomePage> {
                       widget.channel.sink.add(pposData2Json());
                     }
                   },
-                  child: Container(
-                    child: new StreamBuilder(
-                      stream: widget.channel.stream,
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          if (snapshot.data is String) {
-                            String data = snapshot.data;
-                            if (data.startsWith("Notice:")) {
-                              //提醒类型的消息
-                              if (lastInfo != data.substring(7, data.length)) {
-                                connectInfo
-                                    .writeln(data.substring(7, data.length));
-                                lastInfo = data.substring(7, data.length);
-                              }
-                            } else if (!isPainting) {
-                              //数据类型的消息
-                              DataJson dataJson = DataJson(data);
-                              _pPosBox.clear();
-                              dataJson.data.forEach((list) {
-                                List<PPos> line = [];
-                                list.forEach((ppos) {
-                                  line.add(PPos(Offset(ppos.pos.x, ppos.pos.y),
-                                      Color(ppos.color), ppos.width));
-                                });
-                                _pPosBox.box.add(line);
-                              });
-                            }
-                          } else if (snapshot.data is PPosBox) {
-                            _pPosBox = snapshot.data;
-                          }
-                        }
-                        return Stack(
-                          children: <Widget>[
-                            CustomPaint(
-                              painter: Draw(_pPosBox),
-                              child: Container(),
-                            ),
-                            Positioned(
-                              top: 10.0,
-                              left: 10.0,
-                              child: Text(connectInfo.toString()),
-                            )
-                          ],
-                        );
-                      },
-                    ),
+                  child: new StreamBuilder(
+                    stream: widget.channel.stream,
+                    builder: (context, snapshot) {
+                      analysisReceiveData(snapshot);
+                      return Stack(
+                        children: <Widget>[
+                          CustomPaint(
+                            painter: Draw(_pPosBox),
+                            child: Container(),
+                          ),
+                          Positioned(
+                            top: 10.0,
+                            left: 10.0,
+                            child: Text(connectInfo.toString()),
+                          )
+                        ],
+                      );
+                    },
                   ),
                 ),
               ),
+              buildWidthMenu(),
+              buildColorMenu(),
             ],
           ),
         ),
       ),
     );
   }
-}
 
-class Draw extends CustomPainter {
-  final PPosBox pPosBox;
-
-  Draw(this.pPosBox);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    // TODO: implement paint
-    final paint = Paint();
-    paint.color = Colors.blue;
-    paint.strokeCap = StrokeCap.round;
-    PPos lastPPos;
-    pPosBox.box.forEach((line) {
-      lastPPos = null;
-      line.forEach((pPos) {
-        paint.color = pPos.color;
-        paint.strokeWidth = pPos.width;
-        if (lastPPos != null) {
-          canvas.restore();
-          canvas.drawLine(lastPPos.pos, pPos.pos, paint);
-          canvas.save();
+  //解析接收数据并执行对应操作
+  void analysisReceiveData(AsyncSnapshot snapshot) {
+    if (snapshot.hasData) {
+      if (snapshot.data is String) {
+        String data = snapshot.data;
+        TotalData totalData = TotalData(data);
+        if (totalData.type == MsgType.TYPE_CONN.index) {
+          //提醒类型的消息
+          if (lastInfo != totalData.conn_msg.msg) {
+            connectInfo.writeln(totalData.conn_msg.msg);
+            lastInfo = totalData.conn_msg.msg;
+          }
+        } else if (totalData.type == MsgType.TYPE_DATA.index && !isPainting) {
+          //数据类型的消息
+          DataJson dataJson = DataJson(totalData.data_msg);
+          _pPosBox.clear();
+          dataJson.data.forEach((list) {
+            List<PPos> line = [];
+            list.forEach((ppos) {
+              line.add(PPos(Offset(ppos.pos.x, ppos.pos.y), Color(ppos.color),
+                  ppos.width));
+            });
+            _pPosBox.box.add(line);
+          });
         }
-        lastPPos = pPos;
-      });
-    });
-  }
-
-  @override
-  bool shouldRepaint(Draw oldDelegate) {
-    // TODO: implement shouldRepaint
-    return true;
+      } else if (snapshot.data is PPosBox) {
+        _pPosBox = snapshot.data;
+      }
+    }
   }
 }

@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 
 //绘画坐标数据类
@@ -52,71 +50,5 @@ class PPosBox {
 
   void clear() {
     box = [];
-  }
-}
-
-class DataJson {
-  List<List<PPosJson>> data = [];
-
-  DataJson.fromParams({this.data});
-
-  factory DataJson(jsonStr) => jsonStr == null
-      ? null
-      : jsonStr is String
-          ? new DataJson.fromJson(json.decode(jsonStr))
-          : new DataJson.fromJson(jsonStr);
-
-  DataJson.fromJson(jsonRes) {
-    data = jsonRes['data'] == null ? null : [];
-
-    for (var dataItem in data == null ? [] : jsonRes['data']) {
-      List<PPosJson> dataChild = dataItem == null ? null : [];
-      for (var dataItemItem in dataChild == null ? [] : dataItem) {
-        dataChild.add(
-            dataItemItem == null ? null : new PPosJson.fromJson(dataItemItem));
-      }
-      data.add(dataChild);
-    }
-  }
-
-  @override
-  String toString() {
-    return '{"data": $data}';
-  }
-}
-
-class PPosJson {
-  int color;
-  double width;
-  PosJson pos;
-
-  PPosJson.fromParams({this.color, this.width, this.pos});
-
-  PPosJson.fromJson(jsonRes) {
-    color = jsonRes['color'];
-    width = jsonRes['width'];
-    pos = jsonRes['pos'] == null ? null : new PosJson.fromJson(jsonRes['pos']);
-  }
-
-  @override
-  String toString() {
-    return '{"color": $color,"width": $width,"pos": $pos}';
-  }
-}
-
-class PosJson {
-  double x;
-  double y;
-
-  PosJson.fromParams({this.x, this.y});
-
-  PosJson.fromJson(jsonRes) {
-    x = jsonRes['x'];
-    y = jsonRes['y'];
-  }
-
-  @override
-  String toString() {
-    return '{"x": $x,"y": $y}';
   }
 }
