@@ -6,6 +6,8 @@ import 'package:web_socket_channel/io.dart';
 import 'model_paint.dart';
 import 'view_draw.dart';
 
+const String USER_MSG_FLAG = "[-MSG-]";
+
 class HomePage extends StatefulWidget {
   final channel = new IOWebSocketChannel.connect('ws://49.234.76.105:80/ping');
 
@@ -24,11 +26,13 @@ class _HomePageState extends State<HomePage> {
   bool isPainting = true; //时候处于绘画
   StringBuffer connectInfo = new StringBuffer(); //保存数据
   String lastInfo = ''; //用来对比接收数据避免重复的flag
+  TextEditingController textController; //文本编辑监听
 
   @override
   void initState() {
     super.initState();
     _pPosBox = new PPosBox();
+    textController = new TextEditingController();
   }
 
   //创建宽度按钮
@@ -228,6 +232,63 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  //创建输入框
+  Widget buildTextField() {
+    return Theme(
+      data: new ThemeData(
+        primaryColor: Colors.blueAccent,
+        hintColor: Colors.blueAccent,
+      ),
+      child: TextField(
+        controller: textController,
+        decoration: InputDecoration(
+          contentPadding: EdgeInsets.only(left: 10.0, right: 5.0),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(5.0),
+          ),
+        ),
+      ),
+    );
+  }
+
+  //创建输入区域
+  Widget buildInputContainer() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          Expanded(
+            flex: 1,
+            child: Container(
+              margin: const EdgeInsets.only(left: 10.0, right: 5.0),
+              child: buildTextField(),
+            ),
+          ),
+          Material(
+            color: Colors.white,
+            child: Ink(
+              child: InkWell(
+                child: Container(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Icon(
+                    Icons.send,
+                    color: Colors.blueAccent,
+                  ),
+                ),
+                onTap: () {
+                  widget.channel.sink
+                      .add("${USER_MSG_FLAG}${textController.text}");
+                  textController.clear();
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   //将绘制数据转化为Json数据
   String pposData2Json() {
     DataJson dataJson = DataJson('{"data":[]}');
@@ -317,6 +378,7 @@ class _HomePageState extends State<HomePage> {
               ),
               buildWidthMenu(),
               buildColorMenu(),
+              buildInputContainer(),
             ],
           ),
         ),
@@ -331,10 +393,17 @@ class _HomePageState extends State<HomePage> {
         String data = snapshot.data;
         TotalData totalData = TotalData(data);
         if (totalData.type == MsgType.TYPE_CONN.index) {
-          //提醒类型的消息
+          //连接类型的消息
           if (lastInfo != totalData.conn_msg.msg) {
             connectInfo.writeln(totalData.conn_msg.msg);
             lastInfo = totalData.conn_msg.msg;
+          }
+        } else if (totalData.type == MsgType.TYPE_USER.index) {
+          //用户类型的消息
+          if (lastInfo != totalData.user_msg.msg) {
+            connectInfo.writeln(
+                '${totalData.user_msg.users.name}:${totalData.user_msg.msg}');
+            lastInfo = totalData.user_msg.msg;
           }
         } else if (totalData.type == MsgType.TYPE_DATA.index && !isPainting) {
           //数据类型的消息
