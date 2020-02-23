@@ -24,7 +24,8 @@ class _HomePageState extends State<HomePage> {
   double paintWidth = 2.0; //画笔宽度
   String lastData = ''; //上次的数据，用于对比接收数据的flag
   bool isPainting = true; //时候处于绘画
-  StringBuffer connectInfo = new StringBuffer(); //保存数据
+  StringBuffer inputContents = new StringBuffer(); //保存数据
+  List<String> inputArr = [];
   String lastInfo = ''; //用来对比接收数据避免重复的flag
   TextEditingController textController; //文本编辑监听
 
@@ -146,7 +147,7 @@ class _HomePageState extends State<HomePage> {
           buildMainButton('清空', true, () {
             setState(() {
               if (isPainting) {
-                connectInfo.clear();
+                inputContents.clear();
                 _pPosBox.clear();
                 widget.channel.sink.add(pposData2Json());
               }
@@ -368,7 +369,12 @@ class _HomePageState extends State<HomePage> {
                           Positioned(
                             top: 10.0,
                             left: 10.0,
-                            child: Text(connectInfo.toString()),
+                            child: Container(
+                              child: Text(
+                                inputContents.toString(),
+                                maxLines: 8,
+                              ),
+                            ),
                           )
                         ],
                       );
@@ -395,14 +401,33 @@ class _HomePageState extends State<HomePage> {
         if (totalData.type == MsgType.TYPE_CONN.index) {
           //连接类型的消息
           if (lastInfo != totalData.conn_msg.msg) {
-            connectInfo.writeln(totalData.conn_msg.msg);
+            if (inputArr.length >= 8) {
+              inputArr.removeAt(0);
+              inputArr.add(totalData.conn_msg.msg);
+            } else {
+              inputArr.add(totalData.conn_msg.msg);
+            }
+            inputContents.clear();
+            inputArr.forEach((element) {
+              inputContents.writeln(element);
+            });
             lastInfo = totalData.conn_msg.msg;
           }
         } else if (totalData.type == MsgType.TYPE_USER.index) {
           //用户类型的消息
           if (lastInfo != totalData.user_msg.msg) {
-            connectInfo.writeln(
-                '${totalData.user_msg.users.name}:${totalData.user_msg.msg}');
+            if (inputArr.length >= 8) {
+              inputArr.removeAt(0);
+              inputArr.add(
+                  '${totalData.user_msg.users.name}:${totalData.user_msg.msg}');
+            } else {
+              inputArr.add(
+                  '${totalData.user_msg.users.name}:${totalData.user_msg.msg}');
+            }
+            inputContents.clear();
+            inputArr.forEach((element) {
+              inputContents.writeln(element);
+            });
             lastInfo = totalData.user_msg.msg;
           }
         } else if (totalData.type == MsgType.TYPE_DATA.index && !isPainting) {
