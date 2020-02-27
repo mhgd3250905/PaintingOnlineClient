@@ -48,7 +48,7 @@ class _HomePageState extends State<HomePage> {
             child: Column(
               children: <Widget>[
                 Container(
-                  height: 30.0,
+                  height: 20.0,
                   margin: const EdgeInsets.only(bottom: 5.0),
                   child: checked
                       ? Icon(
@@ -72,7 +72,7 @@ class _HomePageState extends State<HomePage> {
   //创建主菜单按钮
   Widget buildMainButton(String title, bool checked, VoidCallback onPressed) {
     return Expanded(
-      flex: 1,
+      flex: 2,
       child: Container(
         height: 50.0,
         margin: const EdgeInsets.only(
@@ -113,6 +113,7 @@ class _HomePageState extends State<HomePage> {
     return Expanded(
       flex: 1,
       child: Container(
+        height: 30.0,
         margin: const EdgeInsets.all(3.0),
         child: MaterialButton(
           color: color,
@@ -161,7 +162,6 @@ class _HomePageState extends State<HomePage> {
   //创建颜色菜单
   Widget buildColorMenu() {
     return Container(
-      margin: const EdgeInsets.only(bottom: 5.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
@@ -245,7 +245,7 @@ class _HomePageState extends State<HomePage> {
         decoration: InputDecoration(
           contentPadding: EdgeInsets.only(left: 10.0, right: 5.0),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(5.0),
+            borderRadius: BorderRadius.circular(2.5),
           ),
         ),
       ),
@@ -262,7 +262,7 @@ class _HomePageState extends State<HomePage> {
           Expanded(
             flex: 1,
             child: Container(
-              margin: const EdgeInsets.only(left: 10.0, right: 5.0),
+              margin: const EdgeInsets.only(left: 5.0, right: 5.0),
               child: buildTextField(),
             ),
           ),
@@ -329,58 +329,13 @@ class _HomePageState extends State<HomePage> {
           color: Colors.white,
           child: Column(
             children: <Widget>[
-              buildMainMenu(),
               Expanded(
-                child: GestureDetector(
-                  onPanStart: (detail) {
-                    setState(() {
-                      _pos = detail.globalPosition;
-                      PPos pPos = new PPos(_pos, paintColor, paintWidth);
-                      _pPosBox.appendStartPos(pPos);
-                    });
-                  },
-                  onPanUpdate: (detail) {
-                    setState(() {
-                      _pos = detail.globalPosition;
-                      PPos pPos = new PPos(_pos, paintColor, paintWidth);
-                      _pPosBox.appendPos(pPos);
-                    });
-                  },
-                  onPanEnd: (detail) {
-                    if (isPainting) {
-                      widget.channel.sink.add(pposData2Json());
-                    }
-                  },
-                  onPanCancel: () {
-                    if (isPainting) {
-                      widget.channel.sink.add(pposData2Json());
-                    }
-                  },
-                  child: new StreamBuilder(
-                    stream: widget.channel.stream,
-                    builder: (context, snapshot) {
-                      analysisReceiveData(snapshot);
-                      return Stack(
-                        children: <Widget>[
-                          CustomPaint(
-                            painter: Draw(_pPosBox),
-                            child: Container(),
-                          ),
-                          Positioned(
-                            top: 10.0,
-                            left: 10.0,
-                            child: Container(
-                              child: Text(
-                                inputContents.toString(),
-                                maxLines: 8,
-                              ),
-                            ),
-                          )
-                        ],
-                      );
-                    },
-                  ),
-                ),
+                flex: 1,
+                child: buildMainMenu(),
+              ),
+              Expanded(
+                flex: 4,
+                child: buildPaintContainer(),
               ),
               buildWidthMenu(),
               buildColorMenu(),
@@ -447,5 +402,143 @@ class _HomePageState extends State<HomePage> {
         _pPosBox = snapshot.data;
       }
     }
+  }
+
+  //构建用户头像列表
+  Widget buildUserIconColumn() {
+    return Container(
+      padding: const EdgeInsets.only(left: 10.0, right: 10.0),
+      child: Column(
+        children: <Widget>[
+          Expanded(
+            child: Container(
+              alignment: Alignment.center,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Icon(Icons.person_pin),
+                  Text(
+                    '用户1',
+                    style: TextStyle(
+                      fontSize: 12.0,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            child: Container(
+              alignment: Alignment.center,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Icon(Icons.person_pin),
+                  Text(
+                    '用户1',
+                    style: TextStyle(
+                      fontSize: 12.0,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            child: Container(
+              alignment: Alignment.center,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Icon(Icons.person_pin),
+                  Text(
+                    '用户1',
+                    style: TextStyle(
+                      fontSize: 12.0,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget buildPaintContainer() {
+    return GestureDetector(
+      onPanStart: (detail) {
+        setState(() {
+          _pos = detail.globalPosition;
+          PPos pPos = new PPos(_pos, paintColor, paintWidth);
+          _pPosBox.appendStartPos(pPos);
+        });
+      },
+      onPanUpdate: (detail) {
+        setState(() {
+          _pos = detail.globalPosition;
+          PPos pPos = new PPos(_pos, paintColor, paintWidth);
+          _pPosBox.appendPos(pPos);
+        });
+      },
+      onPanEnd: (detail) {
+        if (isPainting) {
+          widget.channel.sink.add(pposData2Json());
+        }
+      },
+      onPanCancel: () {
+        if (isPainting) {
+          widget.channel.sink.add(pposData2Json());
+        }
+      },
+      child: new StreamBuilder(
+        stream: widget.channel.stream,
+        builder: (context, snapshot) {
+          analysisReceiveData(snapshot);
+          return Column(
+            children: <Widget>[
+              Expanded(
+                child: CustomPaint(
+                  painter: Draw(_pPosBox),
+                  child: Container(),
+                ),
+              ),
+              Container(
+                width: double.infinity,
+                height: 100.0,
+                child: Row(
+                  children: <Widget>[
+                    buildUserIconColumn(),
+                    Expanded(
+                      child: Container(
+                        width: 200.0,
+                        margin: const EdgeInsets.all(10.0),
+                        padding: const EdgeInsets.all(5.0),
+                        alignment: Alignment.topLeft,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.black87, width: 1.0),
+                          borderRadius: BorderRadius.circular(2.0),
+                        ),
+                        child: Text(
+                          //这里是截取掉最后一个换行符
+                          inputContents.toString().length > 0
+                              ? inputContents.toString().substring(
+                                  0, inputContents.toString().length - 1)
+                              : "",
+                          maxLines: 8,
+                          textAlign: TextAlign.left,
+                        ),
+                      ),
+                    ),
+                    buildUserIconColumn(),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
   }
 }

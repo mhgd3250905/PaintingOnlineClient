@@ -7,6 +7,8 @@
 
 ![主界面](./img/home2.jpg)
 
+![主界面](./img/home3.jpg)
+
 ### 2.项目描述
 
 #### 2.1 客户端
@@ -15,3 +17,13 @@
 
 #### 2.1 服务器
 服务器是使用golang搭建，一个很简单的WebSocket后台[地址在这里](https://github.com/mhgd3250905/GolangStudy/tree/master/GolangStudy/go_study_20200219)
+
+
+
+### 更新记录
+
+20200222 完成基本功能
+
+20200223 添加即时聊天功能
+
+20200224 优化消息传递规则
