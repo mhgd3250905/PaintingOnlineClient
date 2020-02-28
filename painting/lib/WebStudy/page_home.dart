@@ -148,7 +148,7 @@ class _HomePageState extends State<HomePage> {
           buildMainButton('清空', true, () {
             setState(() {
               if (isPainting) {
-                inputContents.clear();
+//                inputContents.clear();
                 _pPosBox.clear();
                 widget.channel.sink.add(pposData2Json());
               }
@@ -162,6 +162,7 @@ class _HomePageState extends State<HomePage> {
   //创建颜色菜单
   Widget buildColorMenu() {
     return Container(
+      margin: const EdgeInsets.only(left: 5.0, right: 5.0, bottom: 10.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
@@ -255,9 +256,12 @@ class _HomePageState extends State<HomePage> {
   //创建输入区域
   Widget buildInputContainer() {
     return Container(
+      height: 50.0,
+      alignment: Alignment.center,
       margin: const EdgeInsets.only(bottom: 10.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           Expanded(
             flex: 1,
@@ -329,12 +333,8 @@ class _HomePageState extends State<HomePage> {
           color: Colors.white,
           child: Column(
             children: <Widget>[
+              buildMainMenu(),
               Expanded(
-                flex: 1,
-                child: buildMainMenu(),
-              ),
-              Expanded(
-                flex: 4,
                 child: buildPaintContainer(),
               ),
               buildWidthMenu(),
@@ -343,6 +343,7 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
         ),
+        resizeToAvoidBottomPadding: true,
       ),
     );
   }
@@ -418,7 +419,7 @@ class _HomePageState extends State<HomePage> {
                 children: <Widget>[
                   Icon(Icons.person_pin),
                   Text(
-                    '用户1',
+                    '用户',
                     style: TextStyle(
                       fontSize: 12.0,
                     ),
@@ -435,7 +436,7 @@ class _HomePageState extends State<HomePage> {
                 children: <Widget>[
                   Icon(Icons.person_pin),
                   Text(
-                    '用户1',
+                    '用户',
                     style: TextStyle(
                       fontSize: 12.0,
                     ),
@@ -452,7 +453,7 @@ class _HomePageState extends State<HomePage> {
                 children: <Widget>[
                   Icon(Icons.person_pin),
                   Text(
-                    '用户1',
+                    '用户',
                     style: TextStyle(
                       fontSize: 12.0,
                     ),
@@ -499,45 +500,57 @@ class _HomePageState extends State<HomePage> {
           return Column(
             children: <Widget>[
               Expanded(
-                child: CustomPaint(
-                  painter: Draw(_pPosBox),
-                  child: Container(),
-                ),
+                child: buildCustomPaintContainer(),
               ),
-              Container(
-                width: double.infinity,
-                height: 100.0,
-                child: Row(
-                  children: <Widget>[
-                    buildUserIconColumn(),
-                    Expanded(
-                      child: Container(
-                        width: 200.0,
-                        margin: const EdgeInsets.all(10.0),
-                        padding: const EdgeInsets.all(5.0),
-                        alignment: Alignment.topLeft,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black87, width: 1.0),
-                          borderRadius: BorderRadius.circular(2.0),
-                        ),
-                        child: Text(
-                          //这里是截取掉最后一个换行符
-                          inputContents.toString().length > 0
-                              ? inputContents.toString().substring(
-                                  0, inputContents.toString().length - 1)
-                              : "",
-                          maxLines: 8,
-                          textAlign: TextAlign.left,
-                        ),
-                      ),
-                    ),
-                    buildUserIconColumn(),
-                  ],
-                ),
-              ),
+              buildUsersContainer(),
             ],
           );
         },
+      ),
+    );
+  }
+
+  Container buildCustomPaintContainer() {
+    return Container(
+      height: 200,
+      child: CustomPaint(
+        painter: Draw(_pPosBox),
+        child: Container(),
+      ),
+    );
+  }
+
+  Container buildUsersContainer() {
+    return Container(
+      width: double.infinity,
+      height: 150.0,
+      child: Row(
+        children: <Widget>[
+          buildUserIconColumn(),
+          Expanded(
+            child: Container(
+              width: 200.0,
+              margin: const EdgeInsets.all(10.0),
+              padding: const EdgeInsets.all(5.0),
+              alignment: Alignment.topLeft,
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.black87, width: 1.0),
+                borderRadius: BorderRadius.circular(2.0),
+              ),
+              child: Text(
+                //这里是截取掉最后一个换行符
+                inputContents.toString().length > 0
+                    ? inputContents
+                        .toString()
+                        .substring(0, inputContents.toString().length - 1)
+                    : "",
+                maxLines: 8,
+                textAlign: TextAlign.left,
+              ),
+            ),
+          ),
+          buildUserIconColumn(),
+        ],
       ),
     );
   }
