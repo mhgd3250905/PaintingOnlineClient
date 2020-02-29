@@ -1,23 +1,22 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:painting/WebStudy/model_net_data.dart';
+import 'package:painting/WebStudy/model/model_net_data.dart';
+import 'package:painting/WebStudy/model/model_paint.dart';
+import 'package:painting/WebStudy/view/view_draw.dart';
 import 'package:web_socket_channel/io.dart';
 
-import 'model_paint.dart';
-import 'view_draw.dart';
+import 'page_home.dart';
+import 'page_input.dart';
 
-const String USER_MSG_FLAG = "[-MSG-]";
-
-class HomePage extends StatefulWidget {
-  final channel = new IOWebSocketChannel.connect('ws://49.234.76.105:80/ping');
-
-  HomePage();
+class ViewHomeContent extends StatefulWidget {
+  final IOWebSocketChannel channel;
+  ViewHomeContent({Key key, this.channel}) : super(key: key);
 
   @override
-  _HomePageState createState() => _HomePageState();
+  _ViewHomeContentState createState() => _ViewHomeContentState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _ViewHomeContentState extends State<ViewHomeContent>
+    with WidgetsBindingObserver {
   PPosBox _pPosBox; //绘画数据管理器
   Offset _pos = Offset(0, 0);
   Color paintColor = Colors.black; //画笔颜色
@@ -30,10 +29,66 @@ class _HomePageState extends State<HomePage> {
   TextEditingController textController; //文本编辑监听
 
   @override
+  void didChangeMetrics() {
+    // TODO: implement didChangeMetrics
+    super.didChangeMetrics();
+    double bottom = MediaQuery.of(context).viewInsets.bottom;
+    print('didChangeMetrics bottom: ${bottom}');
+  }
+
+  @override
   void initState() {
     super.initState();
     _pPosBox = new PPosBox();
     textController = new TextEditingController();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          '你画我猜',
+          textDirection: TextDirection.ltr,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 22.0,
+            color: Colors.black87,
+          ),
+        ),
+      ),
+      body: Stack(
+        children: <Widget>[
+          Container(
+            color: Colors.white,
+            child: Column(
+              children: <Widget>[
+                buildMainMenu(),
+                Expanded(
+                  child: buildPaintContainer(),
+                ),
+                buildWidthMenu(),
+                buildColorMenu(),
+//                buildInputContainer(),
+              ],
+            ),
+          ),
+        ],
+      ),
+      resizeToAvoidBottomPadding: false,
+      floatingActionButton: FloatingActionButton(
+        child: Icon(
+          Icons.question_answer,
+          color: Colors.red,
+        ),
+        onPressed: () {
+//          Navigator.pushNamed(context, '/input');
+//          NavigatorRouterUtils.pushToPage(context, InputPage());
+          showDialog(
+              context: context, child: InputPage(channel: widget.channel));
+        },
+      ),
+    );
   }
 
   //创建宽度按钮
@@ -314,40 +369,6 @@ class _HomePageState extends State<HomePage> {
     return jsonStr;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            '你画我猜',
-            textDirection: TextDirection.ltr,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 22.0,
-              color: Colors.black87,
-            ),
-          ),
-        ),
-        body: Container(
-          color: Colors.white,
-          child: Column(
-            children: <Widget>[
-              buildMainMenu(),
-              Expanded(
-                child: buildPaintContainer(),
-              ),
-              buildWidthMenu(),
-              buildColorMenu(),
-              buildInputContainer(),
-            ],
-          ),
-        ),
-        resizeToAvoidBottomPadding: true,
-      ),
-    );
-  }
-
   //解析接收数据并执行对应操作
   void analysisReceiveData(AsyncSnapshot snapshot) {
     if (snapshot.hasData) {
@@ -467,6 +488,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  //构建绘画区域
   Widget buildPaintContainer() {
     return GestureDetector(
       onPanStart: (detail) {
@@ -520,6 +542,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  //构建用户显示区域
   Container buildUsersContainer() {
     return Container(
       width: double.infinity,
