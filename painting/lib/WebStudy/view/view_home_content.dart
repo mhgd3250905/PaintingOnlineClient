@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:painting/WebStudy/model/model_net_data.dart';
 import 'package:painting/WebStudy/model/model_paint.dart';
+import 'package:painting/WebStudy/view/page_input.dart';
 import 'package:painting/WebStudy/view/view_draw.dart';
 import 'package:web_socket_channel/io.dart';
 
 import 'page_home.dart';
-import 'page_input.dart';
 
 class ViewHomeContent extends StatefulWidget {
   final IOWebSocketChannel channel;
+
   ViewHomeContent({Key key, this.channel}) : super(key: key);
 
   @override
@@ -24,9 +25,16 @@ class _ViewHomeContentState extends State<ViewHomeContent>
   String lastData = ''; //上次的数据，用于对比接收数据的flag
   bool isPainting = true; //时候处于绘画
   StringBuffer inputContents = new StringBuffer(); //保存数据
-  List<String> inputArr = [];
+  List<String> inputArr = []; //接收输入值得列表
   String lastInfo = ''; //用来对比接收数据避免重复的flag
   TextEditingController textController; //文本编辑监听
+
+  //界面样式属性
+  Color inputContainerColor = Colors.black54;
+  double inputContainerWidth = 1.0;
+  Color mainMenuEnableColor = Colors.green;
+  Color mainMenuDisableColor = Colors.white;
+  Color mainMenuCleanColor = Colors.redAccent;
 
   @override
   void didChangeMetrics() {
@@ -47,14 +55,25 @@ class _ViewHomeContentState extends State<ViewHomeContent>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          '你画我猜',
-          textDirection: TextDirection.ltr,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 22.0,
-            color: Colors.black87,
-          ),
+        title: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Icon(
+              Icons.palette,
+              color: Colors.white,
+            ),
+            Container(
+              margin: const EdgeInsets.only(left: 10.0),
+              child: Text(
+                '你画我猜',
+                textDirection: TextDirection.ltr,
+                style: TextStyle(
+                    fontWeight: FontWeight.normal,
+                    fontSize: 22.0,
+                    color: Colors.white),
+              ),
+            ),
+          ],
         ),
       ),
       body: Stack(
@@ -69,6 +88,7 @@ class _ViewHomeContentState extends State<ViewHomeContent>
                 ),
                 buildWidthMenu(),
                 buildColorMenu(),
+                buildAnswerMenu(),
 //                buildInputContainer(),
               ],
             ),
@@ -76,18 +96,6 @@ class _ViewHomeContentState extends State<ViewHomeContent>
         ],
       ),
       resizeToAvoidBottomPadding: false,
-      floatingActionButton: FloatingActionButton(
-        child: Icon(
-          Icons.question_answer,
-          color: Colors.red,
-        ),
-        onPressed: () {
-//          Navigator.pushNamed(context, '/input');
-//          NavigatorRouterUtils.pushToPage(context, InputPage());
-          showDialog(
-              context: context, child: InputPage(channel: widget.channel));
-        },
-      ),
     );
   }
 
@@ -125,35 +133,36 @@ class _ViewHomeContentState extends State<ViewHomeContent>
   }
 
   //创建主菜单按钮
-  Widget buildMainButton(String title, bool checked, VoidCallback onPressed) {
+  Widget buildMainButton(String title, bool checked, Color enableColor,
+      Color disableColor, VoidCallback onPressed) {
     return Expanded(
       flex: 2,
       child: Container(
         height: 50.0,
         margin: const EdgeInsets.only(
             top: 10.0, left: 5.0, right: 5.0, bottom: 5.0),
-        decoration: BoxDecoration(boxShadow: [
-          BoxShadow(
-              color: Colors.grey[300],
-              offset: Offset(1.0, 1.0), //阴影xy轴偏移量
-              blurRadius: 1.0, //阴影模糊程度
-              spreadRadius: 1.0 //阴影扩散程度
-              )
-        ]),
         child: InkWell(
           child: Container(
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: !checked ? Colors.white : Colors.black87,
-              borderRadius: BorderRadius.circular(2.5),
+              color: !checked ? disableColor : enableColor,
+              borderRadius: BorderRadius.circular(25),
               border: Border.all(
-                  color: checked ? Colors.white : Colors.black87,
+                  color: checked ? disableColor : enableColor,
                   width: checked ? 0 : 1.0),
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.grey[300],
+                    offset: Offset(1.0, 1.0), //阴影xy轴偏移量
+                    blurRadius: 1.0, //阴影模糊程度
+                    spreadRadius: 1.0 //阴影扩散程度
+                    ),
+              ],
             ),
             child: Text(
               title,
               style: TextStyle(
-                color: checked ? Colors.white : Colors.black87,
+                color: checked ? disableColor : enableColor,
               ),
             ),
           ),
@@ -190,17 +199,20 @@ class _ViewHomeContentState extends State<ViewHomeContent>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          buildMainButton('绘图', isPainting, () {
+          buildMainButton(
+              '绘图', isPainting, mainMenuEnableColor, mainMenuDisableColor, () {
             setState(() {
               isPainting = true;
             });
           }),
-          buildMainButton('观看', !isPainting, () {
+          buildMainButton(
+              '观看', !isPainting, mainMenuEnableColor, mainMenuDisableColor, () {
             setState(() {
               isPainting = false;
             });
           }),
-          buildMainButton('清空', true, () {
+          buildMainButton('清空', true, mainMenuCleanColor, mainMenuDisableColor,
+              () {
             setState(() {
               if (isPainting) {
 //                inputContents.clear();
@@ -217,7 +229,7 @@ class _ViewHomeContentState extends State<ViewHomeContent>
   //创建颜色菜单
   Widget buildColorMenu() {
     return Container(
-      margin: const EdgeInsets.only(left: 5.0, right: 5.0, bottom: 10.0),
+      margin: const EdgeInsets.only(left: 5.0, right: 5.0, bottom: 0.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
@@ -438,7 +450,10 @@ class _ViewHomeContentState extends State<ViewHomeContent>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Icon(Icons.person_pin),
+                  Icon(
+                    Icons.face,
+                    color: Colors.black87,
+                  ),
                   Text(
                     '用户',
                     style: TextStyle(
@@ -455,7 +470,10 @@ class _ViewHomeContentState extends State<ViewHomeContent>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Icon(Icons.person_pin),
+                  Icon(
+                    Icons.face,
+                    color: Colors.black87,
+                  ),
                   Text(
                     '用户',
                     style: TextStyle(
@@ -472,7 +490,10 @@ class _ViewHomeContentState extends State<ViewHomeContent>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Icon(Icons.person_pin),
+                  Icon(
+                    Icons.face,
+                    color: Colors.black87,
+                  ),
                   Text(
                     '用户',
                     style: TextStyle(
@@ -557,7 +578,8 @@ class _ViewHomeContentState extends State<ViewHomeContent>
               padding: const EdgeInsets.all(5.0),
               alignment: Alignment.topLeft,
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.black87, width: 1.0),
+                border: Border.all(
+                    color: inputContainerColor, width: inputContainerWidth),
                 borderRadius: BorderRadius.circular(2.0),
               ),
               child: Text(
@@ -574,6 +596,32 @@ class _ViewHomeContentState extends State<ViewHomeContent>
           ),
           buildUserIconColumn(),
         ],
+      ),
+    );
+  }
+
+  //构建回答按钮
+  Widget buildAnswerMenu() {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(left: 8.0, right: 8.0, bottom: 5.0),
+      child: MaterialButton(
+        color: Colors.blue,
+        height: 40.0,
+        child: Text(
+          '点击回答',
+          style: TextStyle(
+            fontSize: 16.0,
+            color: Colors.white,
+          ),
+        ),
+        onPressed: () {
+          showDialog(
+              context: context,
+              child: InputPage(
+                channel: widget.channel,
+              ));
+        },
       ),
     );
   }
