@@ -14,6 +14,7 @@ class Draw extends CustomPainter {
     final paint = Paint();
     paint.color = Colors.blue;
     paint.strokeCap = StrokeCap.round;
+
     PPos lastPPos;
     pPosBox.box.forEach((line) {
       lastPPos = null;

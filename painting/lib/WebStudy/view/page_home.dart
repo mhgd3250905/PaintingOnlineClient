@@ -1,9 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:painting/WebStudy/view/view_home_content.dart';
+import 'package:painting/WebStudy/utils/share_preference_utils.dart';
 import 'package:web_socket_channel/io.dart';
 
-const String USER_MSG_FLAG = "[-MSG-]";
+import 'view_home_content.dart';
 
 class HomePage extends StatefulWidget {
   final channel =
@@ -16,6 +16,19 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getAccount();
+  }
+
+  void getAccount() async {
+    String account =
+        await SharedPreferenceUtil.get(SharedPreferenceUtil.KEY_REMOTE_USER_ID);
+    print('userId : ${account}');
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

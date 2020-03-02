@@ -3,9 +3,8 @@ import 'package:painting/WebStudy/model/model_net_data.dart';
 import 'package:painting/WebStudy/model/model_paint.dart';
 import 'package:painting/WebStudy/view/page_input.dart';
 import 'package:painting/WebStudy/view/view_draw.dart';
+import 'package:painting/res.dart';
 import 'package:web_socket_channel/io.dart';
-
-import 'page_home.dart';
 
 class ViewHomeContent extends StatefulWidget {
   final IOWebSocketChannel channel;
@@ -350,7 +349,7 @@ class _ViewHomeContentState extends State<ViewHomeContent>
                 ),
                 onTap: () {
                   widget.channel.sink
-                      .add("${USER_MSG_FLAG}${textController.text}");
+                      .add("${Res.USER_MSG_FLAG}${textController.text}");
                   textController.clear();
                 },
               ),
@@ -553,6 +552,7 @@ class _ViewHomeContentState extends State<ViewHomeContent>
     );
   }
 
+  //创建自定义绘画区域
   Container buildCustomPaintContainer() {
     return Container(
       height: 200,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'WebStudy/view/page_home.dart';
+import 'WebStudy/view/page_login.dart';
 
 void main() => runApp(
-      HomePage(),
+      LoginPage(),
     );

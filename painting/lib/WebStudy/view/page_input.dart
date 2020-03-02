@@ -1,8 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:painting/res.dart';
 import 'package:web_socket_channel/io.dart';
-
-import 'page_home.dart';
 
 class InputPage extends StatefulWidget {
   final IOWebSocketChannel channel;
@@ -83,7 +82,7 @@ class _InputPageState extends State<InputPage> {
                         hintStyle: TextStyle(color: Colors.grey)),
                     onSubmitted: (text) {
 //                      print('onSubmitted:${text}');
-                      widget.channel.sink.add("${USER_MSG_FLAG}${text}");
+                      widget.channel.sink.add("${Res.USER_MSG_FLAG}${text}");
                       _textEditingController.clear();
                       Navigator.of(context).pop();
                     },
@@ -116,8 +115,8 @@ class _InputPageState extends State<InputPage> {
                 ),
                 GestureDetector(
                   onTap: () {
-                    widget.channel.sink
-                        .add("${USER_MSG_FLAG}${_textEditingController.text}");
+                    widget.channel.sink.add(
+                        "${Res.USER_MSG_FLAG}${_textEditingController.text}");
                     _textEditingController.clear();
                     Navigator.of(context).pop();
                   },
