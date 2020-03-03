@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
-import 'WebStudy/view/page_login.dart';
+import 'package:painting/WebStudy/view/page_splash.dart';
 
 void main() => runApp(
-      LoginPage(),
+      SplashPage(),
     );

@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:painting/WebStudy/model/model_net_data.dart';
 import 'package:painting/WebStudy/model/model_paint.dart';
@@ -15,8 +17,7 @@ class ViewHomeContent extends StatefulWidget {
   _ViewHomeContentState createState() => _ViewHomeContentState();
 }
 
-class _ViewHomeContentState extends State<ViewHomeContent>
-    with WidgetsBindingObserver {
+class _ViewHomeContentState extends State<ViewHomeContent> {
   PPosBox _pPosBox; //绘画数据管理器
   Offset _pos = Offset(0, 0);
   Color paintColor = Colors.black; //画笔颜色
@@ -27,6 +28,8 @@ class _ViewHomeContentState extends State<ViewHomeContent>
   List<String> inputArr = []; //接收输入值得列表
   String lastInfo = ''; //用来对比接收数据避免重复的flag
   TextEditingController textController; //文本编辑监听
+  Widget mainWidget;
+  bool hasRefreshed = false;
 
   //界面样式属性
   Color inputContainerColor = Colors.black54;
@@ -36,66 +39,82 @@ class _ViewHomeContentState extends State<ViewHomeContent>
   Color mainMenuCleanColor = Colors.redAccent;
 
   @override
-  void didChangeMetrics() {
-    // TODO: implement didChangeMetrics
-    super.didChangeMetrics();
-    double bottom = MediaQuery.of(context).viewInsets.bottom;
-    print('didChangeMetrics bottom: ${bottom}');
-  }
-
-  @override
   void initState() {
     super.initState();
     _pPosBox = new PPosBox();
     textController = new TextEditingController();
+
+    mainWidget = Container(
+      color: Colors.white,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Hero(
+            tag: Res.HERO_TAG_SPLASH_TITLE,
+            child: Text(
+              '你画我猜',
+              textDirection: TextDirection.ltr,
+              style: TextStyle(
+                fontSize: 45.0,
+                fontWeight: FontWeight.bold,
+                color: Colors.blue,
+                fontStyle: FontStyle.normal,
+                decoration: TextDecoration.none,
+              ),
+            ),
+          ),
+          Container(
+            height: 100.0,
+          ),
+          SizedBox(
+            child: CircularProgressIndicator(),
+            height: 44.0,
+            width: 44.0,
+          ),
+        ],
+      ),
+    );
+    Future.delayed(
+        Duration(
+          milliseconds: 2000,
+        ), () {
+      setState(() {
+        hasRefreshed = true;
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Icon(
-              Icons.palette,
-              color: Colors.white,
-            ),
-            Container(
-              margin: const EdgeInsets.only(left: 10.0),
-              child: Text(
-                '你画我猜',
-                textDirection: TextDirection.ltr,
-                style: TextStyle(
-                    fontWeight: FontWeight.normal,
-                    fontSize: 22.0,
-                    color: Colors.white),
-              ),
-            ),
-          ],
-        ),
-      ),
-      body: Stack(
-        children: <Widget>[
-          Container(
-            color: Colors.white,
-            child: Column(
-              children: <Widget>[
-                buildMainMenu(),
-                Expanded(
-                  child: buildPaintContainer(),
-                ),
-                buildWidthMenu(),
-                buildColorMenu(),
-                buildAnswerMenu(),
+    if (hasRefreshed) {
+      mainWidget = Material(
+        child: Container(
+          color: Colors.white,
+          padding: EdgeInsets.only(
+              top: MediaQueryData.fromWindow(window).padding.top),
+          child: Stack(
+            children: <Widget>[
+              Container(
+                child: Column(
+                  children: <Widget>[
+                    buildMainMenu(),
+                    Expanded(
+                      child: buildPaintContainer(),
+                    ),
+                    buildWidthMenu(),
+                    buildColorMenu(),
+                    buildAnswerMenu(),
 //                buildInputContainer(),
-              ],
-            ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-      resizeToAvoidBottomPadding: false,
-    );
+        ),
+      );
+    }
+    return mainWidget;
   }
 
   //创建宽度按钮
@@ -555,7 +574,11 @@ class _ViewHomeContentState extends State<ViewHomeContent>
   //创建自定义绘画区域
   Container buildCustomPaintContainer() {
     return Container(
-      height: 200,
+      margin: const EdgeInsets.all(10.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(5.0),
+        color: Colors.grey[200],
+      ),
       child: CustomPaint(
         painter: Draw(_pPosBox),
         child: Container(),
