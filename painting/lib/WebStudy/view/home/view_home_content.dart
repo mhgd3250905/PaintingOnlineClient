@@ -3,10 +3,13 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:painting/WebStudy/model/model_net_data.dart';
 import 'package:painting/WebStudy/model/model_paint.dart';
-import 'package:painting/WebStudy/view/page_input.dart';
-import 'package:painting/WebStudy/view/view_draw.dart';
+import 'package:painting/WebStudy/utils/device_utils.dart';
 import 'package:painting/res.dart';
 import 'package:web_socket_channel/io.dart';
+
+import 'dialog_input.dart';
+import 'view_draw.dart';
+import 'widgets_page_home.dart';
 
 class ViewHomeContent extends StatefulWidget {
   final IOWebSocketChannel channel;
@@ -91,8 +94,7 @@ class _ViewHomeContentState extends State<ViewHomeContent> {
       mainWidget = Material(
         child: Container(
           color: Colors.white,
-          padding: EdgeInsets.only(
-              top: MediaQueryData.fromWindow(window).padding.top),
+          padding: EdgeInsets.only(top: DeviceUtils.getStatusBarHeight(window)),
           child: Stack(
             children: <Widget>[
               Container(
@@ -115,100 +117,6 @@ class _ViewHomeContentState extends State<ViewHomeContent> {
       );
     }
     return mainWidget;
-  }
-
-  //创建宽度按钮
-  Widget buildWidthButton(
-      Color color, double radius, bool checked, VoidCallback onPressed) {
-    return Expanded(
-      flex: 1,
-      child: InkWell(
-        onTap: onPressed,
-        child: Container(
-          child: Center(
-            child: Column(
-              children: <Widget>[
-                Container(
-                  height: 20.0,
-                  margin: const EdgeInsets.only(bottom: 5.0),
-                  child: checked
-                      ? Icon(
-                          Icons.keyboard_arrow_down,
-                          color: paintColor,
-                        )
-                      : Container(),
-                ),
-                CircleAvatar(
-                  backgroundColor: color,
-                  radius: radius,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  //创建主菜单按钮
-  Widget buildMainButton(String title, bool checked, Color enableColor,
-      Color disableColor, VoidCallback onPressed) {
-    return Expanded(
-      flex: 2,
-      child: Container(
-        height: 50.0,
-        margin: const EdgeInsets.only(
-            top: 10.0, left: 5.0, right: 5.0, bottom: 5.0),
-        child: InkWell(
-          child: Container(
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: !checked ? disableColor : enableColor,
-              borderRadius: BorderRadius.circular(25),
-              border: Border.all(
-                  color: checked ? disableColor : enableColor,
-                  width: checked ? 0 : 1.0),
-              boxShadow: [
-                BoxShadow(
-                    color: Colors.grey[300],
-                    offset: Offset(1.0, 1.0), //阴影xy轴偏移量
-                    blurRadius: 1.0, //阴影模糊程度
-                    spreadRadius: 1.0 //阴影扩散程度
-                    ),
-              ],
-            ),
-            child: Text(
-              title,
-              style: TextStyle(
-                color: checked ? disableColor : enableColor,
-              ),
-            ),
-          ),
-          onTap: onPressed,
-        ),
-      ),
-    );
-  }
-
-  //创建颜色按钮
-  Widget buildColorButton(Color color, bool checked, VoidCallback onPressed) {
-    return Expanded(
-      flex: 1,
-      child: Container(
-        height: 30.0,
-        margin: const EdgeInsets.all(3.0),
-        child: MaterialButton(
-          color: color,
-          child: checked
-              ? Icon(
-                  Icons.check,
-                  color: Colors.white,
-                )
-              : Container(),
-          onPressed: onPressed,
-        ),
-      ),
-    );
   }
 
   //创建主菜单
@@ -641,7 +549,7 @@ class _ViewHomeContentState extends State<ViewHomeContent> {
         onPressed: () {
           showDialog(
               context: context,
-              child: InputPage(
+              child: DialogInput(
                 channel: widget.channel,
               ));
         },

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../model/model_paint.dart';
+import 'package:painting/WebStudy/model/model_paint.dart';
 
 //自定义画布
 class Draw extends CustomPainter {

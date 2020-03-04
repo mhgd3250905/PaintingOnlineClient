@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:painting/res.dart';
 import 'package:web_socket_channel/io.dart';
 
-class InputPage extends StatefulWidget {
+class DialogInput extends StatefulWidget {
   final IOWebSocketChannel channel;
 
-  InputPage({Key key, this.channel}) : super(key: key);
+  DialogInput({Key key, this.channel}) : super(key: key);
 
   @override
-  _InputPageState createState() => _InputPageState();
+  _DialogInputState createState() => _DialogInputState();
 }
 
-class _InputPageState extends State<InputPage> {
+class _DialogInputState extends State<DialogInput> {
   TextEditingController _textEditingController = new TextEditingController();
 
   @override

@@ -13,8 +13,9 @@ class SharedPreferenceUtil {
   }
 
   // 异步读取
-  static Future<String> get(String key) async {
+  static Future<String> get(String key, String defaultValue) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
-    return sp.getString(key);
+    String value = sp.getString(key);
+    return value == null ? defaultValue : value;
   }
 }

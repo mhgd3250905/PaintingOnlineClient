@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:painting/WebStudy/utils/device_utils.dart';
 import 'package:painting/WebStudy/utils/navigator_router_utils.dart';
 import 'package:painting/WebStudy/utils/share_preference_utils.dart';
+
+import 'file:///D:/Android/Proj/PaintingOnlineClient/painting/lib/WebStudy/view/home/page_home.dart';
 
 ///登录界面
 ///没有用户名的时候需要设置用户名
 class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    DeviceUtils.setBarStatus(true);
     return MaterialApp(
       home: MainContent(),
     );
@@ -109,7 +113,7 @@ class _MainContentState extends State<MainContent> {
             SharedPreferenceUtil.KEY_REMOTE_USER_ID,
             _controller.text,
           ).whenComplete(() {
-            NavigatorRouterUtils.pushAndRemoveUntil(context, MainContent());
+            NavigatorRouterUtils.pushAndRemoveUntil(context, HomePage());
           }).catchError((e) {});
         },
         child: Icon(
