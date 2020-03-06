@@ -6,7 +6,7 @@ class RoomInfo {
   String desc;
   String name;
   String password;
-  String websocket_url;
+  String roomId;
 
   RoomInfo.fromParams(
       {this.max_user,
@@ -14,7 +14,7 @@ class RoomInfo {
       this.desc,
       this.name,
       this.password,
-      this.websocket_url});
+      this.roomId});
 
   factory RoomInfo(jsonStr) => jsonStr == null
       ? null
@@ -28,11 +28,11 @@ class RoomInfo {
     desc = jsonRes['desc'];
     name = jsonRes['name'];
     password = jsonRes['password'];
-    websocket_url = jsonRes['websocket_url'];
+    roomId = jsonRes['room_id'];
   }
 
   @override
   String toString() {
-    return '{"max_user": $max_user,"password_enable": ${password != null ? '${json.encode(password)}' : 'null'}_enable,"desc": ${desc != null ? '${json.encode(desc)}' : 'null'},"name": ${name != null ? '${json.encode(name)}' : 'null'},"password": ${password != null ? '${json.encode(password)}' : 'null'},"websocket_url": ${websocket_url != null ? '${json.encode(websocket_url)}' : 'null'}}';
+    return '{"max_user": $max_user,"password_enable": ${password != null ? '${json.encode(password)}' : 'null'}_enable,"desc": ${desc != null ? '${json.encode(desc)}' : 'null'},"name": ${name != null ? '${json.encode(name)}' : 'null'},"password": ${password != null ? '${json.encode(password)}' : 'null'},"room_id": ${roomId != null ? '${json.encode(roomId)}' : 'null'}}';
   }
 }

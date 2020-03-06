@@ -103,12 +103,7 @@ class _MainContentState extends State<MainContent> {
                   shrinkWrap: true,
                   itemCount: roomArr.length,
                   itemBuilder: (BuildContext context, int index) {
-                    return GestureDetector(
-                      onTap: () {
-                        showDialog(context: context, child: DialogRoomInfo());
-                      },
-                      child: getGridItemContainer(roomArr[index]),
-                    );
+                    return getGridItemContainer(roomArr[index]);
                   },
                   gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                       //单个子Widget的水平最大宽度
@@ -129,8 +124,6 @@ class _MainContentState extends State<MainContent> {
   //点击创建按钮事件
   //添加一个新的房间
   void onPress() {
-    setState(() {
-      roomArr.add('${roomArr.length}');
-    });
+    showDialog(context: context, child: DialogRoomInfo());
   }
 }

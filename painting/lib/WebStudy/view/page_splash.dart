@@ -3,6 +3,7 @@ import 'package:painting/WebStudy/instance/instance_websocket.dart';
 import 'package:painting/WebStudy/utils/device_utils.dart';
 import 'package:painting/WebStudy/utils/navigator_router_utils.dart';
 import 'package:painting/WebStudy/utils/share_preference_utils.dart';
+import 'package:painting/WebStudy/view/home/page_home.dart';
 import 'package:painting/WebStudy/view/room_list/page_room_list.dart';
 import 'package:painting/res.dart';
 
@@ -56,7 +57,7 @@ class _MainContentState extends State<MainContent> {
       if (account.isEmpty) {
         jumpToPage = LoginPage();
       } else {
-        jumpToPage = RoomListPage();
+        jumpToPage = HomePage();
       }
       NavigatorRouterUtils.pushAndRemoveUntil(context, jumpToPage);
     });
