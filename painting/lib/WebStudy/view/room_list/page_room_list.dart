@@ -124,6 +124,17 @@ class _MainContentState extends State<MainContent> {
   //点击创建按钮事件
   //添加一个新的房间
   void onPress() {
-    showDialog(context: context, child: DialogRoomInfo());
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        child: WillPopScope(
+          child: DialogRoomInfo(
+            //房间ID就是角标+1
+            roomId: roomArr.length + 1,
+          ),
+          onWillPop: () async {
+            return Future.value(false);
+          },
+        ));
   }
 }
